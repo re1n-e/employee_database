@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc-14",
+    "files.associations": {
+        "file.h": "c",
+        "inet.h": "c"
+    }
+}
