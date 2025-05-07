@@ -30,6 +30,12 @@ int validate_db_header(int fd, struct dbheader_t **headerOut)
         free(header);
         return STATUS_ERROR;
     }
+
+    header->version = ntohs(header->version);
+    header->count = ntohs(header->count);
+    header->filesize = ntohl(header->filesize);
+    header->magic = ntohl(header->magic);
+
 }
 
 int create_db_header(int fd, struct dbheader_t **headerOut)
