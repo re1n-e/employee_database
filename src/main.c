@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <common.h>
+#include <unistd.h>
 #include "file.h"
 #include "parse.h"
 
@@ -17,9 +19,12 @@ int main(int argc, char **argv)
     int c = 0;
     bool newFile = false;
     char *filepath = NULL;
+    char *addString = NULL;
     struct dbheader_t *dbhd = NULL;
+    struct employee_t *employees = NULL;
+    int dbfd = -1;
 
-    while ((c = getopt(argc, argv, "nf:")) != -1)
+    while ((c = getopt(argc, argv, "nf:a:")) != -1)
     {
         switch (c)
         {
@@ -28,6 +33,9 @@ int main(int argc, char **argv)
             break;
         case 'f':
             filepath = optarg;
+            break;
+        case 'a':
+            addString = optarg;
             break;
         case '?':
             printf("Unknown option- %c\n", c);
@@ -47,7 +55,7 @@ int main(int argc, char **argv)
 
     if (newFile)
     {
-        int dbfd = create_db_file(filepath);
+        dbfd = create_db_file(filepath);
         if (dbfd == STATUS_ERROR)
         {
             printf("Unable to create database file\n");
@@ -61,7 +69,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        int dbfd = open_db_file(filepath);
+        dbfd = open_db_file(filepath);
         if (dbfd == STATUS_ERROR)
         {
             printf("Unable to open database file\n");
@@ -74,8 +82,35 @@ int main(int argc, char **argv)
         }
     }
 
-    printf("NewFile: %d\n", newFile);
-    printf("Filepath: %s\n", filepath);
+    if (read_employees(dbfd, dbhd, &employees) == STATUS_ERROR)
+    {
+        printf("Failed to read employees\n");
+        return -1;
+    }
 
+    if (output_file(dbfd, dbhd) == STATUS_ERROR)
+    {
+        printf("Failed to output to the file\n");
+        return -1;
+    }
+
+    if (addString != NULL)
+    {
+        dbhd->count++;
+        employees = realloc(employees, dbhd->count * sizeof(struct employee_t));
+        if (employees == NULL)
+        {
+            perror("realloc");
+            return -1;
+        }
+        if (add_employee(dbhd, employees, addString) == STATUS_ERROR)
+        {
+            printf("Failed to add employee\n");
+            return -1;
+        }
+    }
+    close(dbfd);
+    free(employees);
+    free(dbhd);
     return 0;
 }

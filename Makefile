@@ -4,10 +4,11 @@ OBJ = $(patsubst src/%.c, obj/%.o, $(SRC))
 
 .PHONY: run clean default
 
-run: $(TARGET)
-	./$(TARGET) -f ./mynewdb.db
+run: clean $(TARGET)
+	./$(TARGET) -n -f ./mynewdb.db
+	./$(TARGET) -f ./mynewdb.db -a "Raghavendra Singh Bargali,Haldwani Uttrakhand,120"
 
-default: $(TARGET)
+default: clean $(TARGET)
 
 clean:
 	rm -f obj/*.o 
