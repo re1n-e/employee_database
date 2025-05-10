@@ -18,13 +18,16 @@ int main(int argc, char **argv)
 {
     int c = 0;
     bool newFile = false;
+    bool list = false;
     char *filepath = NULL;
     char *addString = NULL;
+    char *remove = NULL;
+    char *update = NULL;
     struct dbheader_t *dbhd = NULL;
     struct employee_t *employees = NULL;
     int dbfd = -1;
 
-    while ((c = getopt(argc, argv, "nf:a:")) != -1)
+    while ((c = getopt(argc, argv, "nf:a:lr:u:")) != -1)
     {
         switch (c)
         {
@@ -33,6 +36,15 @@ int main(int argc, char **argv)
             break;
         case 'f':
             filepath = optarg;
+            break;
+        case 'l':
+            list = true;
+            break;
+        case 'r':
+            remove = optarg;
+            break;
+        case 'u':
+            update = optarg;
             break;
         case 'a':
             addString = optarg;
@@ -88,12 +100,6 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (output_file(dbfd, dbhd) == STATUS_ERROR)
-    {
-        printf("Failed to output to the file\n");
-        return -1;
-    }
-
     if (addString != NULL)
     {
         dbhd->count++;
@@ -109,6 +115,36 @@ int main(int argc, char **argv)
             return -1;
         }
     }
+
+    if (update != NULL)
+    {
+        if (!update_employee_hours(dbhd, employees, update))
+        {
+            printf("Employee not found\n");
+            return -1;
+        }
+    }
+
+    if (remove != NULL)
+    {
+        if (delete_employee(dbhd, employees, remove) != STATUS_SUCCESS)
+        {
+            printf("Failed to delete employee\n");
+            return -1;
+        }
+    }
+
+    if (output_file(dbfd, dbhd, employees) == STATUS_ERROR)
+    {
+        printf("Failed to output to the file\n");
+        return -1;
+    }
+
+    if (list)
+    {
+        list_employee(dbhd, employees);
+    }
+
     close(dbfd);
     free(employees);
     free(dbhd);

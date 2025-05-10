@@ -1,6 +1,6 @@
 #ifndef PARSE_H
 #define PARSE_H
-
+#include <stdbool.h>
 #define HEADER_MAGIC 0x4c4c4144
 
 struct dbheader_t
@@ -20,7 +20,10 @@ struct employee_t
 
 int create_db_header(int fd, struct dbheader_t **headerOut);
 int validate_db_header(int fd, struct dbheader_t **headerOut);
-int output_file(int fd, struct dbheader_t *dbhdr);
+int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *);
 int read_employees(int fd, struct dbheader_t *, struct employee_t **employeesOut);
 int add_employee(struct dbheader_t *, struct employee_t *, char *);
+void list_employee(struct dbheader_t *, struct employee_t *);
+int delete_employee(struct dbheader_t *, struct employee_t *, char *);
+bool update_employee_hours(struct dbheader_t *, struct employee_t *, char *);
 #endif
